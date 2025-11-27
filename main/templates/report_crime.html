@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Report Crime{% endblock %}
+{% block content %}
+<div class="col-md-8 mx-auto mt-4">
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-primary text-light d-flex align-items-center justify-content-between">
+      <h5 class="mb-0"><i class="bi bi-flag"></i> Report a Crime</h5>
+      <span class="badge bg-warning text-dark">🔮 AI-Powered Analysis</span>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-3">
+        Please describe the incident in detail. Our smart AI system will automatically classify the crime type, 
+        assign a severity, and generate a summary for investigation.
+      </p>
+
+      <form method="post" enctype="multipart/form-data" id="crimeForm"> <!-- ✅ note this change -->
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Title</label>
+          <input type="text" name="title" class="form-control shadow-sm" placeholder="e.g. Theft at market" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Description</label>
+          <textarea name="description" rows="4" class="form-control shadow-sm" placeholder="Describe the incident in detail..." required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Location</label>
+          <input type="text" name="location" class="form-control shadow-sm" placeholder="Enter location (e.g. Delhi, Connaught Place)" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Attach Evidence (optional)</label>
+          <input type="file" name="evidence" class="form-control shadow-sm">
+          <small class="text-muted">You can upload an image, video, or document as supporting evidence.</small>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 shadow-sm fw-semibold">
+          <i class="bi bi-send"></i> Submit Report
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🔮 AI Analysis Loading Overlay -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("#crimeForm");
+  if (!form) return;
+
+  form.addEventListener("submit", function() {
+    // Create overlay element
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "rgba(0, 0, 0, 0.7)";
+    overlay.style.display = "flex";
+    overlay.style.flexDirection = "column";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = 9999;
+    overlay.innerHTML = `
+      <div class="text-center text-white">
+        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-3 fs-5 fw-semibold">🔮 Analyzing your report with AI...</p>
+        <p class="small text-light">Please wait a few seconds while our system classifies and summarizes your report.</p>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  });
+});
+</script>
+{% endblock %}

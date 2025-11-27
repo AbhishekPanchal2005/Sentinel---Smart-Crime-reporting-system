@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% block title %}Welcome to Sentinel{% endblock %}
+{% block content %}
+<style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes gridMove {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(20px);
+    }
+}
+
+.hero-section {
+    position: relative;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
+    color: white;
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(88, 86, 214, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 193, 7, 0.08) 0%, transparent 40%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.grid-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    opacity: 0.4;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 4.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff 0%, #ffc107 50%, #ff9800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    animation: fadeInUp 1s ease-out;
+    letter-spacing: -2px;
+    text-shadow: 0 0 40px rgba(255, 193, 7, 0.3);
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: fadeInUp 1s ease-out 0.2s backwards;
+    backdrop-filter: blur(10px);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.hero-sub {
+    font-size: 1.35rem;
+    opacity: 0.9;
+    max-width: 650px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    font-weight: 300;
+    animation: fadeInUp 1s ease-out 0.4s backwards;
+    color: #e0e0e0;
+}
+
+.btn-hero {
+    position: relative;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #000;
+    font-weight: 700;
+    padding: 16px 48px;
+    border-radius: 50px;
+    margin-top: 10px;
+    border: none;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease-out 0.6s backwards;
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+    overflow: hidden;
+}
+
+.btn-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-hero:hover::before {
+    left: 100%;
+}
+
+.btn-hero:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(255, 193, 7, 0.5);
+    color: #000;
+}
+
+.register-link {
+    display: inline-block;
+    margin-top: 25px;
+    animation: fadeInUp 1s ease-out 0.8s backwards;
+}
+
+.register-link a {
+    color: #ffc107;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 1rem;
+}
+
+.register-link a::after {
+    content: '→';
+    margin-left: 8px;
+    transition: margin-left 0.3s ease;
+}
+
+.register-link a:hover {
+    color: #fff;
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.register-link a:hover::after {
+    margin-left: 12px;
+}
+
+.feature-icons {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    animation: fadeInUp 1s ease-out 1s backwards;
+    z-index: 2;
+}
+
+.feature-icon {
+    text-align: center;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.feature-icon:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+}
+
+.feature-icon i {
+    font-size: 2rem;
+    color: #ffc107;
+    margin-bottom: 8px;
+}
+
+.feature-icon span {
+    display: block;
+    font-size: 0.85rem;
+    color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-sub {
+        font-size: 1.1rem;
+    }
+    
+    .btn-hero {
+        padding: 14px 36px;
+        font-size: 1rem;
+    }
+    
+    .feature-icons {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+}
+</style>
+
+<div class="hero-section">
+    <div class="grid-background"></div>
+    <div class="hero-content">
+        <div class="hero-badge">🛡️ AI-Powered Security Platform</div>
+        <h1 class="hero-title">Sentinel</h1>
+        <p class="hero-sub">
+            Experience next-generation crime reporting with intelligent analytics and real-time insights. Building safer communities through technology.
+        </p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="btn btn-hero">Get Started</a>
+            <div class="register-link">
+                <a href="{% url 'register' %}">New Citizen? Register Here</a>
+            </div>
+        {% else %}
+            <a href="{% url 'home' %}" class="btn btn-hero">Go to Dashboard</a>
+        {% endif %}
+    </div>
+    
+    <div class="feature-icons">
+        <div class="feature-icon">
+            <i>⚡</i>
+            <span>Instant Reports</span>
+        </div>
+        <div class="feature-icon">
+            <i>🤖</i>
+            <span>AI Analysis</span>
+        </div>
+        <div class="feature-icon">
+            <i>🔒</i>
+            <span>Secure & Private</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

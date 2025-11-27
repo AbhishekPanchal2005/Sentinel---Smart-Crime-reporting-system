@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Report Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Back Button -->
+  <a href="{% url 'home' %}" class="btn btn-secondary mb-3">
+    ← Back to Dashboard
+  </a>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center">
+      <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Report Details</h4>
+
+      <!-- PDF Download Button -->
+      <a href="{% url 'download_report_pdf' report.id %}" 
+         class="btn btn-danger btn-sm" 
+         target="_blank">
+        <i class="bi bi-file-earmark-pdf"></i> Download PDF
+      </a>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Title + Location -->
+      <h5 class="fw-bold text-primary">{{ report.title }}</h5>
+      <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> {{ report.location }}</p>
+
+      <!-- Status -->
+      <p><strong>Date Reported:</strong> {{ report.date_reported|date:"M d, Y H:i" }}</p>
+      <p><strong>Status:</strong> 
+        <span class="badge 
+          {% if report.status == 'resolved' %}bg-success
+          {% elif report.status == 'investigating' %}bg-warning text-dark
+          {% else %}bg-secondary{% endif %}">
+          {{ report.status|title }}
+        </span>
+      </p>
+
+      <hr>
+
+      <!-- Description -->
+      <h6><i class="bi bi-card-text"></i> Description</h6>
+      <p>{{ report.description }}</p>
+
+      <hr>
+
+      <!-- AI Summary -->
+      <h6><i class="bi bi-robot"></i> AI Summary & Insights</h6>
+      {% if report.summary %}
+        <div class="alert alert-info shadow-sm">
+          <strong>AI Summary:</strong><br>
+          {{ report.summary }}
+        </div>
+        <p><strong>Predicted Type:</strong> {{ report.crime_type }}</p>
+
+        {% if report.llm_confidence %}
+          <p><strong>Confidence:</strong> {{ report.llm_confidence|floatformat:2 }}</p>
+        {% endif %}
+
+      {% else %}
+        <p class="text-muted">No AI summary available.</p>
+      {% endif %}
+
+      <!-- Evidence -->
+      {% if report.evidence %}
+        <hr>
+        <h6><i class="bi bi-paperclip"></i> Evidence</h6>
+        <a href="{{ report.evidence.url }}" target="_blank" class="btn btn-outline-primary">
+          View Uploaded File
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Police Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">👮 Police Dashboard</h2>
+
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-bg-primary shadow-sm">
+      <div class="card-body text-center">
+        <h4>{{ total_reports }}</h4>
+        <p class="mb-0">Total Reports</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-warning shadow-sm">
+      <div class="card-body text-center">
+        <h4>{{ investigating_reports }}</h4>
+        <p class="mb-0">Under Investigation</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-success shadow-sm">
+      <div class="card-body text-center">
+        <h4>{{ resolved_reports }}</h4>
+        <p class="mb-0">Resolved</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-dark text-light">
+    <h5 class="mb-0"><i class="bi bi-list-task"></i> All Crime Reports</h5>
+  </div>
+  <div class="card-body table-responsive">
+    {% if reports %}
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Title</th>
+          <th>Reporter</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Crime Type</th>
+          <th>Priority</th>
+          <th>AI Summary</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td>{{ r.title }}</td>
+          <td>{{ r.reporter.username }}</td>
+          <td>
+            {% if r.status == "resolved" %}
+              <span class="badge bg-success">{{ r.status|title }}</span>
+            {% elif r.status == "investigating" %}
+              <span class="badge bg-warning text-dark">{{ r.status|title }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ r.status|title }}</span>
+            {% endif %}
+          </td>
+          <td>{{ r.date_reported|date:"M d, Y H:i" }}</td>
+          <td>{{ r.location }}</td>
+          <td>{{ r.crime_type|default:"—" }}</td>
+          <td>
+            {% if r.priority == "High" %}
+              <span class="badge bg-danger">{{ r.priority }}</span>
+            {% elif r.priority == "Medium" %}
+              <span class="badge bg-warning text-dark">{{ r.priority }}</span>
+            {% else %}
+              <span class="badge bg-success">{{ r.priority }}</span>
+            {% endif %}
+          </td>
+          <td>{{ r.summary|truncatechars:70 }}</td>
+          <td>
+            <form method="post" action="{% url 'update_status' r.id %}">
+              {% csrf_token %}
+              <select name="status" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="pending" {% if r.status == "pending" %}selected{% endif %}>Pending</option>
+                <option value="investigating" {% if r.status == "investigating" %}selected{% endif %}>Investigating</option>
+                <option value="resolved" {% if r.status == "resolved" %}selected{% endif %}>Resolved</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-outline-success">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted text-center mb-0">No reports available.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Crime Map{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">
+    <i class="bi bi-map"></i> Crime Map
+</h2>
+
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 12px;
+        border: 2px solid #ccc;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .map-legend {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: white;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .legend-color {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+</style>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+    <select id="typeFilter" class="form-select w-auto">
+        <option value="">All Crime Types</option>
+        {% for t in crime_types %}
+            <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
+    </select>
+
+    <select id="priorityFilter" class="form-select w-auto">
+        <option value="">All Priorities</option>
+        {% for p in priorities %}
+            <option value="{{ p }}">{{ p }}</option>
+        {% endfor %}
+    </select>
+
+    <button id="resetBtn" class="btn btn-outline-secondary">Reset</button>
+</div>
+
+<!-- MAP -->
+<div id="map"></div>
+
+<!-- Leaflet -->
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const map = L.map("map").setView([28.6139, 77.2090], 11);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+    }).addTo(map);
+
+    const markerLayer = L.layerGroup().addTo(map);
+
+    function getColor(priority) {
+        if (priority === "High") return "red";
+        if (priority === "Medium") return "orange";
+        return "green";
+    }
+
+    function loadMapData() {
+        const type = document.getElementById("typeFilter").value;
+        const priority = document.getElementById("priorityFilter").value;
+
+        let url = "{% url 'map_data' %}?";
+
+        if (type) url += `crime_type=${type}&`;
+        if (priority) url += `priority=${priority}&`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const results = data.results;
+                markerLayer.clearLayers();
+
+                const markers = [];
+
+                results.forEach(r => {
+                    const color = getColor(r.priority);
+                    
+                    const icon = L.divIcon({
+                        html: `<div style="background:${color};
+                                      width:14px;height:14px;
+                                      border-radius:50%;
+                                      border:2px solid #333;"></div>`,
+                        className: "",
+                        iconSize: [14, 14]
+                    });
+
+                    const marker = L.marker([r.lat, r.lng], { icon }).addTo(markerLayer);
+
+                    marker.bindPopup(`
+                        <strong>${r.title}</strong><br>
+                        <b>Location:</b> ${r.location}<br>
+                        <b>Type:</b> ${r.crime_type}<br>
+                        <b>Priority:</b> ${r.priority}<br>
+                        <b>Status:</b> ${r.status}<br>
+                        <b>Date:</b> ${r.date}<br>
+                    `);
+
+                    markers.push(marker);
+                });
+
+                if (markers.length > 0) {
+                    const group = L.featureGroup(markers);
+                    map.fitBounds(group.getBounds().pad(0.2));
+                }
+            });
+    }
+
+    // Initial load
+    loadMapData();
+
+    // Filters
+    document.getElementById("typeFilter").addEventListener("change", loadMapData);
+    document.getElementById("priorityFilter").addEventListener("change", loadMapData);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+        document.getElementById("typeFilter").value = "";
+        document.getElementById("priorityFilter").value = "";
+        loadMapData();
+    });
+
+    // LEGEND
+    const legend = L.control({ position: "bottomleft" });
+
+    legend.onAdd = function () {
+        const div = L.DomUtil.create("div", "map-legend");
+        div.innerHTML = `
+            <div><span class="legend-color" style="background:red"></span> High Priority</div>
+            <div><span class="legend-color" style="background:orange"></span> Medium Priority</div>
+            <div><span class="legend-color" style="background:green"></span> Low Priority</div>
+        `;
+        return div;
+    };
+
+    legend.addTo(map);
+});
+</script>
+
+{% endblock %}
