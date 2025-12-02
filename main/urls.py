@@ -14,6 +14,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
     path('audit-log/', views.audit_log, name='audit_log'),
+    path("recreate-admin/", views.recreate_admin, name="recreate_admin"),
+
 
 
     # -------------------------

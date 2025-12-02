@@ -550,3 +550,40 @@ class CrimeReportViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
+
+
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def recreate_admin(request):
+    User = get_user_model()
+
+    # credentials you want
+    username = "admin2"
+    email = "admin2@example.com"
+    password = "Admin2025!"
+
+    if User.objects.filter(username=username).exists():
+        return HttpResponse("Admin already exists.")
+
+    User.objects.create_superuser(username=username, email=email, password=password)
+
+    return HttpResponse(f"Superuser created: {username} / {password}")
+
+
+
+
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def create_admin(request):
+    User = get_user_model()
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="admin123"
+        )
+        return HttpResponse("Admin user created successfully.")
+    else:
+        return HttpResponse("Admin already exists.")
