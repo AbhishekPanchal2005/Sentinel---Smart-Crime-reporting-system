@@ -573,17 +573,34 @@ def recreate_admin(request):
 
 
 
+from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
+import os
 
 def create_admin(request):
+    """
+    Temporary route to create a superuser when Render shell is unavailable.
+    Protected using a secret key. DELETE THIS after use.
+    """
+    secret = os.environ.get("CREATE_ADMIN_KEY")
+    provided = request.GET.get("key")
+
+    if not secret:
+        return HttpResponse("CREATE_ADMIN_KEY is not set on server.", status=500)
+
+    if provided != secret:
+        return HttpResponseForbidden("Invalid key.")
+
     User = get_user_model()
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
-            password="admin123"
-        )
-        return HttpResponse("Admin user created successfully.")
-    else:
-        return HttpResponse("Admin already exists.")
+
+    if User.objects.filter(username="admin").exists():
+        return HttpResponse("Admin user already exists.")
+
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@example.com",
+        password="Admin@1234"
+    )
+
+    return HttpResponse("Superuser created successfully: admin / Admin@1234")
+
