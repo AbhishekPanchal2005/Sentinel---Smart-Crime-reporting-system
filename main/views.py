@@ -552,115 +552,78 @@ class CrimeReportViewSet(viewsets.ModelViewSet):
         serializer.save(reporter=self.request.user)
 
 
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-
-def recreate_admin(request):
-    User = get_user_model()
-
-    # credentials you want
-    username = "admin2"
-    email = "admin2@example.com"
-    password = "Admin2025!"
-
-    if User.objects.filter(username=username).exists():
-        return HttpResponse("Admin already exists.")
-
-    User.objects.create_superuser(username=username, email=email, password=password)
-
-    return HttpResponse(f"Superuser created: {username} / {password}")
-
-
-
-
-from django.http import HttpResponse, HttpResponseForbidden
-from django.contrib.auth import get_user_model
-import os
-
-def create_admin(request):
-    """
-    Temporary route to create a superuser when Render shell is unavailable.
-    Protected using a secret key. DELETE THIS after use.
-    """
-    secret = os.environ.get("CREATE_ADMIN_KEY")
-    provided = request.GET.get("key")
-
-    if not secret:
-        return HttpResponse("CREATE_ADMIN_KEY is not set on server.", status=500)
-
-    if provided != secret:
-        return HttpResponseForbidden("Invalid key.")
-
-    User = get_user_model()
-
-    if User.objects.filter(username="admin").exists():
-        return HttpResponse("Admin user already exists.")
-
-    User.objects.create_superuser(
-        username="admin",
-        email="admin@example.com",
-        password="Admin@1234"
-    )
-
-    return HttpResponse("Superuser created successfully: admin / Admin@1234")
-
-
 
 # add near other admin/debug helpers in main/views.py
 import os
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth import get_user_model
 
+from django.contrib.auth import get_user_model
+import os
+from django.http import HttpResponse
+
+# ===========================
+# TEMPORARY DEMO USERS CREATOR
+# ===========================
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse, HttpResponseForbidden
+import os
+
 def create_demo_users(request):
-    """
-    One-time protected endpoint to create demo police & admin accounts.
-    Use: /create-demo-users/?key=<CREATE_ADMIN_KEY>
-    Remove this view and URL after use.
-    """
-    expected_key = os.environ.get("CREATE_ADMIN_KEY")
-    provided_key = request.GET.get("key", "")
-    if not expected_key:
-        return HttpResponse("CREATE_ADMIN_KEY not configured on server.", status=400)
-    if provided_key != expected_key:
-        return HttpResponseForbidden("Forbidden: invalid key.")
+    secret = request.GET.get("key")
+    expected = os.environ.get("DEMO_USER_KEY")
+
+    if expected is None:
+        return HttpResponse("DEMO_USER_KEY is not set in environment.", status=400)
+
+    if secret != expected:
+        return HttpResponseForbidden("Invalid key.")
 
     User = get_user_model()
+
     created = []
 
-    # Create police user
-    if not User.objects.filter(username="police1").exists():
-        User.objects.create_user(
-            username="police1",
-            email="police1@example.com",
-            password="Police@123",
-            role="police",
-            is_active=True
+    # Admin user
+    if not User.objects.filter(username="admin_demo").exists():
+        User.objects.create_superuser(
+            username="admin_demo",
+            password="AdminDemo@123",
+            email="admin_demo@example.com",
+            role="admin"
         )
-        created.append("police1/Police@123")
+        created.append("admin_demo")
 
-    # Create admin user (superuser + staff)
-    if not User.objects.filter(username="admin1").exists():
-        try:
-            User.objects.create_superuser(
-                username="admin1",
-                email="admin1@example.com",
-                password="Admin@1234",
-            )
-        except TypeError:
-            # fallback for custom create_superuser signature
-            user = User.objects.create_user(
-                username="admin1",
-                email="admin1@example.com",
-                password="Admin@1234",
-                role="admin",
-            )
-            user.is_staff = True
-            user.is_superuser = True
-            user.save()
-        created.append("admin1/Admin@1234")
+    # Police user
+    if not User.objects.filter(username="police_demo").exists():
+        u = User.objects.create_user(
+            username="police_demo",
+            password="PoliceDemo@123",
+            email="police_demo@example.com",
+            role="police"
+        )
+        u.is_staff = True
+        u.save()
+        created.append("police_demo")
+
+    # Citizen user (optional)
+    if not User.objects.filter(username="citizen_demo").exists():
+        User.objects.create_user(
+            username="citizen_demo",
+            password="CitizenDemo@123",
+            email="citizen_demo@example.com",
+            role="citizen"
+        )
+        created.append("citizen_demo")
 
     if not created:
-        return HttpResponse("Demo users already exist.", status=200)
+        return HttpResponse("Demo users already exist.")
 
-    return HttpResponse("Created demo users: " + ", ".join(created), status=201)
+    return HttpResponse("Successfully created demo users: " + ", ".join(created))
+
+
+
+
+
+
+
 
