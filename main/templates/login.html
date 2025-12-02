@@ -328,6 +328,15 @@
             <p class="login-subtitle">Access your secure crime reporting dashboard</p>
         </div>
         
+        {% if messages %}
+        <div class="alert alert-danger mt-2" style="font-size: 14px; padding: 8px 12px; border-radius: 8px;">
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
         <form method="POST">
             {% csrf_token %}
             <div class="form-group">
