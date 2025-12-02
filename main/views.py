@@ -604,3 +604,63 @@ def create_admin(request):
 
     return HttpResponse("Superuser created successfully: admin / Admin@1234")
 
+
+
+# add near other admin/debug helpers in main/views.py
+import os
+from django.http import HttpResponse, HttpResponseForbidden
+from django.contrib.auth import get_user_model
+
+def create_demo_users(request):
+    """
+    One-time protected endpoint to create demo police & admin accounts.
+    Use: /create-demo-users/?key=<CREATE_ADMIN_KEY>
+    Remove this view and URL after use.
+    """
+    expected_key = os.environ.get("CREATE_ADMIN_KEY")
+    provided_key = request.GET.get("key", "")
+    if not expected_key:
+        return HttpResponse("CREATE_ADMIN_KEY not configured on server.", status=400)
+    if provided_key != expected_key:
+        return HttpResponseForbidden("Forbidden: invalid key.")
+
+    User = get_user_model()
+    created = []
+
+    # Create police user
+    if not User.objects.filter(username="police1").exists():
+        User.objects.create_user(
+            username="police1",
+            email="police1@example.com",
+            password="Police@123",
+            role="police",
+            is_active=True
+        )
+        created.append("police1/Police@123")
+
+    # Create admin user (superuser + staff)
+    if not User.objects.filter(username="admin1").exists():
+        try:
+            User.objects.create_superuser(
+                username="admin1",
+                email="admin1@example.com",
+                password="Admin@1234",
+            )
+        except TypeError:
+            # fallback for custom create_superuser signature
+            user = User.objects.create_user(
+                username="admin1",
+                email="admin1@example.com",
+                password="Admin@1234",
+                role="admin",
+            )
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+        created.append("admin1/Admin@1234")
+
+    if not created:
+        return HttpResponse("Demo users already exist.", status=200)
+
+    return HttpResponse("Created demo users: " + ", ".join(created), status=201)
+
